@@ -15,7 +15,7 @@ import { Channels } from './pages/Channels';
 import { Skills } from './pages/Skills';
 import { Cron } from './pages/Cron';
 import { Settings } from './pages/Settings';
-import { Setup } from './pages/Setup';
+import { Activation } from './pages/Activation';
 import { useSettingsStore } from './stores/settings';
 import { useGatewayStore } from './stores/gateway';
 import { applyGatewayTransportPreference } from './lib/api-client';
@@ -92,7 +92,7 @@ function App() {
   const theme = useSettingsStore((state) => state.theme);
   const language = useSettingsStore((state) => state.language);
   const gatewayTransportPreference = useSettingsStore((state) => state.gatewayTransportPreference);
-  const setupComplete = useSettingsStore((state) => state.setupComplete);
+  const cdkVerified = useSettingsStore((state) => state.cdkVerified);
   const initGateway = useGatewayStore((state) => state.init);
 
   useEffect(() => {
@@ -111,12 +111,12 @@ function App() {
     initGateway();
   }, [initGateway]);
 
-  // Redirect to setup wizard if not complete
+  // Redirect to activation if CDK not verified
   useEffect(() => {
-    if (!setupComplete && !location.pathname.startsWith('/setup')) {
-      navigate('/setup');
+    if (!cdkVerified && !location.pathname.startsWith('/activation')) {
+      navigate('/activation');
     }
-  }, [setupComplete, location.pathname, navigate]);
+  }, [cdkVerified, location.pathname, navigate]);
 
   // Listen for navigation events from main process
   useEffect(() => {
@@ -159,8 +159,8 @@ function App() {
     <ErrorBoundary>
       <TooltipProvider delayDuration={300}>
         <Routes>
-          {/* Setup wizard (shown on first launch) */}
-          <Route path="/setup/*" element={<Setup />} />
+          {/* CDK Activation (shown on first launch) */}
+          <Route path="/activation" element={<Activation />} />
 
           {/* Main application routes */}
           <Route element={<MainLayout />}>

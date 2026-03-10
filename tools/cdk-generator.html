@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDK Generator - ClawX</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4fc3f7;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #90caf9;
+        }
+        input[type="text"],
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4fc3f7;
+        }
+        button {
+            background: #4fc3f7;
+            color: #1a1a2e;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #81d4fa;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .cdk-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(79, 195, 247, 0.1);
+            border-radius: 8px;
+            border: 1px solid #4fc3f7;
+            display: none;
+        }
+        .cdk-result.show {
+            display: block;
+        }
+        .cdk-value {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            text-align: center;
+            color: #4fc3f7;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .info-label {
+            color: #90a4ae;
+        }
+        .info-value {
+            color: #81d4fa;
+            font-family: 'Courier New', monospace;
+        }
+        .copy-btn {
+            background: transparent;
+            border: 1px solid #4fc3f7;
+            color: #4fc3f7;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .copy-btn:hover {
+            background: rgba(79, 195, 247, 0.2);
+        }
+        .history {
+            margin-top: 30px;
+        }
+        .history h2 {
+            margin-bottom: 16px;
+            color: #4fc3f7;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        .history-cdk {
+            font-family: 'Courier New', monospace;
+            color: #81d4fa;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .history-date {
+            color: #90a4ae;
+            font-size: 14px;
+        }
+        .history-exp {
+            color: #a5d6a7;
+            font-size: 12px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .clear-btn {
+            background: #ef5350;
+        }
+        .clear-btn:hover {
+            background: #e57373;
+        }
+        .error {
+            color: #ef5350;
+            margin-top: 10px;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+        .segment-breakdown {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+        }
+        .segment-breakdown h4 {
+            color: #90caf9;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .segment-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .segment-item:last-child {
+            border-bottom: none;
+        }
+        .segment-name {
+            color: #90a4ae;
+        }
+        .segment-value {
+            color: #4fc3f7;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 CDK Generator (6-Segment)</h1>
+        
+        <div class="card">
+            <div class="form-group">
+                <label for="apiKey">API Key (20 characters)</label>
+                <input type="text" id="apiKey" placeholder="sk-XXXXXXXXXXXXXXXXX" maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="randomSeed">Random Seed (Optional)</label>
+                <input type="text" id="randomSeed" placeholder="Enter any string or leave empty for random">
+            </div>
+            <div class="form-group">
+                <label for="expirationDate">Expiration Date</label>
+                <input type="date" id="expirationDate">
+            </div>
+            <div class="actions">
+                <button onclick="generateCdk()">Generate CDK</button>
+                <button class="clear-btn" onclick="clearHistory()">Clear History</button>
+            </div>
+            
+            <div class="cdk-result" id="result">
+                <label>Generated CDK (6 Segments):</label>
+                <div class="cdk-value" id="cdkValue"></div>
+                
+                <div class="info-row">
+                    <span class="info-label">Expiration:</span>
+                    <span class="info-value" id="expDisplay"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">API Key:</span>
+                    <span class="info-value" id="apiKeyDisplay"></span>
+                </div>
+                
+                <div class="segment-breakdown">
+                    <h4>Segment Breakdown:</h4>
+                    <div id="segmentBreakdown"></div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="copy-btn" onclick="copyCdk()">📋 Copy CDK</button>
+                </div>
+            </div>
+            <div class="error" id="error"></div>
+        </div>
+
+        <div class="history card">
+            <h2>📜 History</h2>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Extended alphabet: a-z, A-Z, 0-9, - (62 + 1 = 63 characters, use 62 for base62)
+        const ALPHABET = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        const BASE = 62;
+        const SECRET = 'CLAWX2024SECRET';
+        const DATE_EPOCH_YEAR = 2020;
+
+        // Encode a number to base62 string with fixed length
+        function base62Encode(num, length) {
+            let result = '';
+            let remaining = num;
+            for (let i = 0; i < length; i++) {
+                result = ALPHABET[remaining % BASE] + result;
+                remaining = Math.floor(remaining / BASE);
+            }
+            return result;
+        }
+
+        // Simple hash function for strings
+        function simpleHash(input) {
+            let hash = 0;
+            for (let i = 0; i < input.length; i++) {
+                const char = input.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        // Generate deterministic hash for API Key segments
+        function hashToSegment(input, index, length) {
+            const combined = input + ':' + index.toString() + ':' + SECRET;
+            const hash = simpleHash(combined);
+            // Use modulo to fit within the segment capacity
+            const maxValue = Math.pow(BASE, length);
+            return base62Encode(hash % maxValue, length);
+        }
+
+        // Encode API Key into 4 segments (deterministic hash-based)
+        function encodeApiKey(apiKey) {
+            const segments = [];
+            for (let i = 0; i < 4; i++) {
+                segments.push(hashToSegment(apiKey, i, 4));
+            }
+            return segments;
+        }
+
+        function generateCdk() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const randomSeed = document.getElementById('randomSeed').value || Math.random().toString(36).substring(7);
+            const expirationDate = document.getElementById('expirationDate').value;
+            const errorEl = document.getElementById('error');
+            const resultEl = document.getElementById('result');
+            
+            errorEl.textContent = '';
+            resultEl.classList.remove('show');
+
+            if (!apiKey) {
+                errorEl.textContent = 'Please enter an API Key';
+                return;
+            }
+
+            if (apiKey.length < 10) {
+                errorEl.textContent = 'API Key must be at least 10 characters';
+                return;
+            }
+
+            if (!expirationDate) {
+                errorEl.textContent = 'Please select an expiration date';
+                return;
+            }
+
+            const parts = expirationDate.split('-');
+            const year = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10);
+            const day = parseInt(parts[2], 10);
+            
+            // Segment 1: Date part (year-month-day encoded)
+            const dateNum = (year - DATE_EPOCH_YEAR) * 10000 + month * 100 + day;
+            const datePart = base62Encode(dateNum, 4);
+
+            // Segments 2-5: API Key encoded (4 segments from API Key hash)
+            const apiKeySegments = encodeApiKey(apiKey);
+
+            // Segment 6: Checksum (verifies date + API key + seed)
+            const checksumInput = SECRET + expirationDate + apiKey + randomSeed;
+            const checksum = simpleHash(checksumInput);
+            const checksumPart = base62Encode(checksum % Math.pow(BASE, 4), 4);
+
+            // Build 6-segment CDK: datePart-seedPart1-seedPart2-seedPart3-seedPart4-checksumPart
+            const cdk = [datePart, ...apiKeySegments, checksumPart].join('-');
+
+            // Display results
+            document.getElementById('cdkValue').textContent = cdk;
+            document.getElementById('expDisplay').textContent = expirationDate;
+            document.getElementById('apiKeyDisplay').textContent = apiKey;
+            
+            // Display segment breakdown
+            const breakdownHtml = `
+                <div class="segment-item">
+                    <span class="segment-name">Date Part:</span>
+                    <span class="segment-value">${datePart}</span>
+                </div>
+                <div class="segment-item">
+                    <span class="segment-name">API Key Segment 1:</span>
+                    <span class="segment-value">${apiKeySegments[0]}</span>
+                </div>
+                <div class="segment-item">
+                    <span class="segment-name">API Key Segment 2:</span>
+                    <span class="segment-value">${apiKeySegments[1]}</span>
+                </div>
+                <div class="segment-item">
+                    <span class="segment-name">API Key Segment 3:</span>
+                    <span class="segment-value">${apiKeySegments[2]}</span>
+                </div>
+                <div class="segment-item">
+                    <span class="segment-name">API Key Segment 4:</span>
+                    <span class="segment-value">${apiKeySegments[3]}</span>
+                </div>
+                <div class="segment-item">
+                    <span class="segment-name">Checksum Part:</span>
+                    <span class="segment-value">${checksumPart}</span>
+                </div>
+            `;
+            document.getElementById('segmentBreakdown').innerHTML = breakdownHtml;
+            
+            resultEl.classList.add('show');
+
+            saveToHistory(cdk, expirationDate, apiKey);
+        }
+
+        function saveToHistory(cdk, expirationDate, apiKey) {
+            let history = JSON.parse(localStorage.getItem('cdkHistory') || '[]');
+            history.unshift({
+                cdk,
+                expirationDate,
+                apiKey,
+                createdAt: new Date().toISOString()
+            });
+            if (history.length > 50) history = history.slice(0, 50);
+            localStorage.setItem('cdkHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('cdkHistory') || '[]');
+            const listEl = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                listEl.innerHTML = '<p style="color: #90a4ae; text-align: center;">No history yet</p>';
+                return;
+            }
+
+            listEl.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <div style="flex: 1; min-width: 0;">
+                        <div class="history-cdk">${item.cdk}</div>
+                        <div class="history-exp">API: ${item.apiKey ? item.apiKey.substring(0, 10) + '...' : 'N/A'} | Expires: ${item.expirationDate}</div>
+                    </div>
+                    <div class="history-date" style="margin-left: 10px; white-space: nowrap;">${new Date(item.createdAt).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function copyCdk() {
+            const cdk = document.getElementById('cdkValue').textContent;
+            navigator.clipboard.writeText(cdk).then(() => {
+                alert('CDK copied to clipboard!');
+            });
+        }
+
+        function clearHistory() {
+            if (confirm('Clear all history?')) {
+                localStorage.removeItem('cdkHistory');
+                renderHistory();
+            }
+        }
+
+        // Set default expiration date to 1 year from now
+        document.getElementById('expirationDate').valueAsDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+        
+        // Set default API Key
+        document.getElementById('apiKey').value = 'sk-tJ48kSQx9CItbGO0g';
+        
+        renderHistory();
+    </script>
+</body>
+</html>

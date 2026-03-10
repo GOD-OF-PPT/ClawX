@@ -42,6 +42,10 @@ interface SettingsState {
   // Setup
   setupComplete: boolean;
 
+  // CDK
+  cdk: string;
+  cdkVerified: boolean;
+
   // Actions
   init: () => Promise<void>;
   setTheme: (theme: Theme) => void;
@@ -63,6 +67,8 @@ interface SettingsState {
   setSidebarCollapsed: (value: boolean) => void;
   setDevModeUnlocked: (value: boolean) => void;
   markSetupComplete: () => void;
+  setCdk: (cdk: string) => void;
+  setCdkVerified: (verified: boolean) => void;
   resetSettings: () => void;
 }
 
@@ -91,6 +97,8 @@ const defaultSettings = {
   sidebarCollapsed: false,
   devModeUnlocked: false,
   setupComplete: false,
+  cdk: '',
+  cdkVerified: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(
@@ -152,6 +160,8 @@ export const useSettingsStore = create<SettingsState>()(
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
       setDevModeUnlocked: (devModeUnlocked) => set({ devModeUnlocked }),
       markSetupComplete: () => set({ setupComplete: true }),
+      setCdk: (cdk) => set({ cdk }),
+      setCdkVerified: (cdkVerified) => set({ cdkVerified }),
       resetSettings: () => set(defaultSettings),
     }),
     {

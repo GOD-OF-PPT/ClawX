@@ -54,6 +54,11 @@ const electronAPI = {
         'settings:setMany',
         'settings:getAll',
         'settings:reset',
+        // CDK
+        'cdk:validate',
+        'cdk:decode',
+        'cdk:getStatus',
+        'cdk:verify',
         'usage:recentTokenHistory',
         // Update
         'update:status',

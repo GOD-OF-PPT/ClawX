@@ -13,7 +13,6 @@ import {
   Terminal,
   ExternalLink,
   Key,
-  Download,
   Copy,
   FileText,
 } from 'lucide-react';
@@ -27,9 +26,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { useSettingsStore } from '@/stores/settings';
 import { useGatewayStore } from '@/stores/gateway';
-import { useUpdateStore } from '@/stores/update';
 import { ProvidersSettings } from '@/components/settings/ProvidersSettings';
-import { UpdateSettings } from '@/components/settings/UpdateSettings';
 import { invokeIpc, toUserMessage } from '@/lib/api-client';
 import { trackUiEvent } from '@/lib/telemetry';
 import { useTranslation } from 'react-i18next';
@@ -66,17 +63,11 @@ export function Settings() {
     setProxyAllServer,
     setProxyBypassRules,
     setGatewayTransportPreference,
-    autoCheckUpdate,
-    setAutoCheckUpdate,
-    autoDownloadUpdate,
-    setAutoDownloadUpdate,
     devModeUnlocked,
     setDevModeUnlocked,
   } = useSettingsStore();
 
   const { status: gatewayStatus, restart: restartGateway } = useGatewayStore();
-  const currentVersion = useUpdateStore((state) => state.currentVersion);
-  const updateSetAutoDownload = useUpdateStore((state) => state.setAutoDownload);
   const [controlUiInfo, setControlUiInfo] = useState<ControlUiInfo | null>(null);
   const [openclawCliCommand, setOpenclawCliCommand] = useState('');
   const [openclawCliError, setOpenclawCliError] = useState<string | null>(null);
@@ -547,51 +538,6 @@ export function Settings() {
         </CardContent>
       </Card>
 
-      {/* Updates */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Download className="h-5 w-5" />
-            {t('updates.title')}
-          </CardTitle>
-          <CardDescription>{t('updates.description')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <UpdateSettings />
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>{t('updates.autoCheck')}</Label>
-              <p className="text-sm text-muted-foreground">
-                {t('updates.autoCheckDesc')}
-              </p>
-            </div>
-            <Switch
-              checked={autoCheckUpdate}
-              onCheckedChange={setAutoCheckUpdate}
-            />
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label>{t('updates.autoDownload')}</Label>
-              <p className="text-sm text-muted-foreground">
-                {t('updates.autoDownloadDesc')}
-              </p>
-            </div>
-            <Switch
-              checked={autoDownloadUpdate}
-              onCheckedChange={(value) => {
-                setAutoDownloadUpdate(value);
-                updateSetAutoDownload(value);
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Advanced */}
       <Card>
         <CardHeader>
@@ -733,35 +679,6 @@ export function Settings() {
         </Card>
       )}
 
-      {/* About */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('about.title')}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            <strong>{t('about.appName')}</strong> - {t('about.tagline')}
-          </p>
-          <p>{t('about.basedOn')}</p>
-          <p>{t('about.version', { version: currentVersion })}</p>
-          <div className="flex gap-4 pt-2">
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => window.electron.openExternal('https://claw-x.com')}
-            >
-              {t('about.docs')}
-            </Button>
-            <Button
-              variant="link"
-              className="h-auto p-0"
-              onClick={() => window.electron.openExternal('https://github.com/ValueCell-ai/ClawX')}
-            >
-              {t('about.github')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

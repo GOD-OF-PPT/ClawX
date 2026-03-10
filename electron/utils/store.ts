@@ -26,6 +26,10 @@ export interface AppSettings {
   startMinimized: boolean;
   launchAtStartup: boolean;
   
+  // CDK Activation
+  cdk: string;
+  cdkVerified: boolean;
+  
   // Gateway
   gatewayAutoStart: boolean;
   gatewayPort: number;
@@ -63,6 +67,10 @@ const defaults: AppSettings = {
   language: 'en',
   startMinimized: false,
   launchAtStartup: false,
+  
+  // CDK Activation
+  cdk: '',
+  cdkVerified: false,
   
   // Gateway
   gatewayAutoStart: true,

@@ -50,6 +50,8 @@ import {
 } from '../services/providers/provider-runtime-sync';
 import { validateApiKeyWithProvider } from '../services/providers/provider-validation';
 import { appUpdater } from './updater';
+import { validateCdkFormat, normalizeCdk, decodeCdk } from '../utils/cdk-validation';
+import { validateCdkRemotely } from '../utils/cdk-remote-validation';
 
 type AppRequest = {
   id?: string;
@@ -133,6 +135,9 @@ export function registerIpcHandlers(
 
   // File staging handlers (upload/send separation)
   registerFileHandlers();
+
+  // CDK handlers
+  registerCdkHandlers();
 }
 
 function mapAppErrorCode(error: unknown): AppResponse['error']['code'] {
@@ -2421,5 +2426,43 @@ function registerSessionHandlers(): void {
       logger.error(`[session:delete] Unexpected error for ${sessionKey}:`, err);
       return { success: false, error: String(err) };
     }
+  });
+}
+
+function registerCdkHandlers(): void {
+  ipcMain.handle('cdk:validate', async (_, cdk: string) => {
+    return validateCdkFormat(cdk);
+  });
+
+  ipcMain.handle('cdk:decode', async (_, cdk: string) => {
+    return decodeCdk(cdk);
+  });
+
+  ipcMain.handle('cdk:getStatus', async () => {
+    const cdk = await getSetting('cdk');
+    const cdkVerified = await getSetting('cdkVerified');
+    return { cdk, cdkVerified };
+  });
+
+  ipcMain.handle('cdk:verify', async (_, cdk: string) => {
+    const remoteResult = await validateCdkRemotely(cdk);
+    if (!remoteResult.valid) {
+      return {
+        success: false,
+        error: remoteResult.error,
+        networkError: remoteResult.networkError,
+      };
+    }
+
+    const validation = validateCdkFormat(cdk);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
+    const normalizedCdk = normalizeCdk(cdk);
+    await setSetting('cdk', normalizedCdk);
+    await setSetting('cdkVerified', true);
+
+    return { success: true, cdk: normalizedCdk };
   });
 }
